@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Plan Health Check - Propuesta Final - Cirion Technologies</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Salesforce Sans', 'Segoe UI', Arial, sans-serif;
+            background: #032D60;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .slide-content {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Navigation */
+        .nav-controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #00A1E0;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #00A1E0;
+            transform: scale(1.05);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 52px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #00A1E0;
+        }
+
+        h2 {
+            font-size: 42px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #00A1E0;
+        }
+
+        h3 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        p {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+
+        /* Logo Header */
+        .logo-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .logo-header-mini {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .logo-placeholder {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            padding: 10px 20px;
+            letter-spacing: 1px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 22px;
+        }
+
+        .salesforce-box .logo-icon {
+            background: linear-gradient(135deg, #00A1E0, #0176D3);
+            color: white;
+        }
+
+        .cirion-box .logo-icon {
+            background: linear-gradient(135deg, #00A1E0, #00D9FF);
+            color: white;
+        }
+
+        .logo-separator {
+            width: 2px;
+            height: 50px;
+            background: rgba(0, 161, 224, 0.5);
+        }
+
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: rgba(0, 161, 224, 0.1);
+            border: 2px solid #00A1E0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(0, 161, 224, 0.2);
+        }
+
+        .stat-number {
+            font-size: 56px;
+            font-weight: 700;
+            color: #00A1E0;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .stat-card.critical .stat-number {
+            color: #FF5252;
+        }
+
+        .stat-card.warning .stat-number {
+            color: #FFC107;
+        }
+
+        .stat-card.success .stat-number {
+            color: #4CAF50;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            font-size: 16px;
+        }
+
+        .data-table th {
+            background: rgba(0, 161, 224, 0.3);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #00A1E0;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table tr:hover {
+            background: rgba(0, 161, 224, 0.1);
+        }
+
+        /* Score visualization */
+        .score-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 40px 0;
+            gap: 30px;
+        }
+
+        .score-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 8px solid;
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .score-circle.green {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .score-circle.yellow {
+            border-color: #FFC107;
+            color: #FFC107;
+        }
+
+        .score-circle.red {
+            border-color: #FF5252;
+            color: #FF5252;
+        }
+
+        /* Index cards for portada */
+        .index-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .index-card {
+            background: rgba(0, 161, 224, 0.15);
+            border: 2px solid #00A1E0;
+            border-radius: 12px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .index-card:hover {
+            background: rgba(0, 161, 224, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .index-card-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .index-card-desc {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Highlight boxes */
+        .highlight-box {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 5px solid #FFC107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .highlight-box.red {
+            background: rgba(255, 82, 82, 0.1);
+            border-left-color: #FF5252;
+        }
+
+        .highlight-box.green {
+            background: rgba(76, 175, 80, 0.1);
+            border-left-color: #4CAF50;
+        }
+
+        /* Lists */
+        ul {
+            padding-left: 30px;
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        /* Comparison table */
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-col {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-col h4 {
+            color: #00A1E0;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        /* Timeline visual */
+        .timeline-phase {
+            background: rgba(0, 161, 224, 0.1);
+            border-left: 4px solid #00A1E0;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+
+        .timeline-phase h4 {
+            color: #FFC107;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-phase p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+
+        <!-- SLIDE 0: Portada -->
+        <div class="slide active">
+            <div class="slide-content" style="text-align: center;">
+                <div class="logo-header">
+                    <div class="logo-box salesforce-box">
+                        <div class="logo-icon">S</div>
+                        <span class="logo-placeholder">SALESFORCE</span>
+                    </div>
+                    <div class="logo-separator"></div>
+                    <div class="logo-box cirion-box">
+                        <div class="logo-icon">C</div>
+                        <span class="logo-placeholder">CIRION</span>
+                    </div>
+                </div>
+
+                <h1 style="margin-top: 30px;">Account Plan Health Check</h1>
+                <p class="subtitle">Propuesta Final: Data Quality Assistant Agent</p>
+                <p style="color: rgba(255,255,255,0.9); font-size: 22px; margin-top: 15px; font-weight: 600;">Plan de Ejecución</p>
+                <p style="color: rgba(255,255,255,0.6); font-size: 18px; margin-top: 20px;">
+                    Reunión 07 de Julio, 2026<br>
+                    Presentado por: Alejandra Scalone<br>Sr. Solution Architect - Salesforce
+                </p>
+
+                <div class="index-grid">
+                    <div class="index-card" onclick="goToSlide(1)">
+                        <div class="index-card-title">📊 Situación Actual</div>
+                        <div class="index-card-desc">Datos validados 692 planes</div>
+                    </div>
+                    <div class="index-card" onclick="goToSlide(2)">
+                        <div class="index-card-title">🎯 Framework A3F</div>
+                        <div class="index-card-desc">85.6/100 - Luz Verde</div>
+                    </div>
+                    <div class="index-card" onclick="goToSlide(3)">
+                        <div class="index-card-title">🤖 Enfoque del Agente</div>
+                        <div class="index-card-desc">Agente a Construir en Salesforce<br>Evolución del POC de Miguel</div>
+                    </div>
+                    <div class="index-card" onclick="goToSlide(4)">
+                        <div class="index-card-title">📅 Plan de Ejecución</div>
+                        <div class="index-card-desc">2 Fases - 4 meses</div>
+                    </div>
+                    <div class="index-card" onclick="goToSlide(5)">
+                        <div class="index-card-title">📊 Plan de Ejecución</div>
+                        <div class="index-card-desc">Resumen consolidado evolutivos de datos y detalle</div>
+                    </div>
+                    <div class="index-card" onclick="goToSlide(6)">
+                        <div class="index-card-title">⚠️ Gestión de Riesgos</div>
+                        <div class="index-card-desc">Decisión GO/NO-GO</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 1: Situación Actual -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="logo-header-mini">
+                    <div class="logo-box salesforce-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">S</div>
+                    </div>
+                    <div class="logo-box cirion-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">C</div>
+                    </div>
+                </div>
+
+                <h2>📊 Situación Actual (Datos Validados)</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">692</div>
+                        <div class="stat-label">Account Plans</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">125</div>
+                        <div class="stat-label">Account Managers</div>
+                    </div>
+                    <div class="stat-card critical">
+                        <div class="stat-number">48.4%</div>
+                        <div class="stat-label">Score Promedio Completitud</div>
+                    </div>
+                    <div class="stat-card critical">
+                        <div class="stat-number">76.3%</div>
+                        <div class="stat-label">Planes SIN Objectives</div>
+                    </div>
+                </div>
+
+                <div class="highlight-box red">
+                    <h3>🚨 Hallazgo Crítico</h3>
+                    <ul style="margin-top: 15px;">
+                        <li><strong>528 planes (76.3%) NO tienen Objectives</strong> - Santiago confirmó: "Se espera que TODOS tengan al menos 1"</li>
+                        <li><strong>90%+ campos estratégicos vacíos</strong> - Cirion Vision Strategy y Account Strategy</li>
+                        <li><strong>Solo 7.9% de planes tienen alta calidad</strong> (> 80% completitud)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Framework A3F -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="logo-header-mini">
+                    <div class="logo-box salesforce-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">S</div>
+                    </div>
+                    <div class="logo-box cirion-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">C</div>
+                    </div>
+                </div>
+
+                <h2 style="font-size: 30px; margin-bottom: 10px;">🎯 Framework A3F</h2>
+
+                <p style="font-size: 13px; line-height: 1.4; margin-bottom: 15px; color: rgba(255,255,255,0.9);">
+                    <strong>A3F:</strong> Metodología de evaluación para proyectos de <strong>Agentforce</strong> utilizada por Professional Services de Salesforce que mide viabilidad en 3 dimensiones.
+                </p>
+
+                <div class="score-container" style="margin: 15px 0; gap: 25px;">
+                    <div class="score-item">
+                        <h3 style="font-size: 19px; margin-bottom: 4px;">FIT - Ajuste Estratégico</h3>
+                        <p style="font-size: 12px; margin-bottom: 8px;">¿Resuelve un problema real del negocio?</p>
+                        <div class="score-circle green" style="width: 150px; height: 150px; font-size: 36px; color: #4CAF50; font-weight: 700;">95/100</div>
+                    </div>
+                    <div class="score-item">
+                        <h3 style="font-size: 19px; margin-bottom: 4px;">FEASIBILITY - Viabilidad Técnica</h3>
+                        <p style="font-size: 12px; margin-bottom: 8px;">¿Es posible construirlo con la tecnología disponible?</p>
+                        <div class="score-circle green" style="width: 150px; height: 150px; font-size: 36px; color: #4CAF50; font-weight: 700;">81.7/100</div>
+                    </div>
+                    <div class="score-item">
+                        <h3 style="font-size: 19px; margin-bottom: 4px;">READINESS - Preparación Org.</h3>
+                        <p style="font-size: 12px; margin-bottom: 8px;">¿La empresa está lista para adoptarlo?</p>
+                        <div class="score-circle green" style="width: 150px; height: 150px; font-size: 36px; color: #4CAF50; font-weight: 700;">80/100</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 15px 0;">
+                    <div style="display: inline-block; background: rgba(76, 175, 80, 0.2); border: 3px solid #4CAF50; border-radius: 10px; padding: 12px 30px;">
+                        <p style="font-size: 17px; margin-bottom: 4px;">TOTAL A3F SCORE - Análisis Cirion</p>
+                        <h1 style="font-size: 44px; color: #4CAF50; margin: 4px 0;">85.6/100</h1>
+                        <p style="font-size: 20px; margin: 6px 0; color: #4CAF50;">🟢 LUZ VERDE - GO</p>
+                        <ul style="text-align: left; font-size: 13px; margin-top: 8px; line-height: 1.4; list-style: none; padding: 0;">
+                            <li>✓ Resuelve problema real y urgente (48.4% completitud)</li>
+                            <li>✓ 82.4% de AMs se beneficiarían directamente</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box green" style="padding: 8px; margin-top: 12px;">
+                    <h3 style="font-size: 17px; margin-bottom: 4px;">Recomendación</h3>
+                    <p style="font-size: 15px; margin: 0;"><strong>Proceder con implementación inmediata</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Enfoque del Agente -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="logo-header-mini">
+                    <div class="logo-box salesforce-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">S</div>
+                    </div>
+                    <div class="logo-box cirion-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">C</div>
+                    </div>
+                </div>
+
+                <h2 style="font-size: 32px; margin-bottom: 15px;">🤖 Agente a Construir en Salesforce</h2>
+
+                <div class="highlight-box" style="background: rgba(76, 175, 80, 0.15); border-left-color: #4CAF50; margin-bottom: 15px; padding: 12px;">
+                    <h3 style="font-size: 18px; margin-bottom: 5px;">✅ Evolución del POC de Miguel Moreno</h3>
+                    <p style="font-size: 14px; margin: 0;">
+                        <strong>POC validado</strong> (Chrome Extension + Claude) → <strong>Solución Enterprise</strong> (Salesforce Agent Builder nativo)
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 15px 0;">
+                    <div style="display: inline-block; background: rgba(0, 161, 224, 0.2); border: 3px solid #00A1E0; border-radius: 10px; padding: 15px 40px;">
+                        <h1 style="font-size: 36px; color: #00A1E0; margin: 0;">Data Quality Assistant Agent</h1>
+                        <p style="font-size: 16px; margin-top: 8px;">Asistente inteligente para completar Account Plans</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
+                    <div style="background: rgba(76, 175, 80, 0.1); border: 2px solid rgba(76, 175, 80, 0.5); border-radius: 8px; padding: 12px;">
+                        <h4 style="color: #4CAF50; margin-bottom: 10px; font-size: 19px;"><span style="font-size: 20px;">⚙️</span> Salesforce Agent Builder - Solución Enterprise Nativa</h4>
+                        <ul style="font-size: 14px; line-height: 1.5; margin: 0; padding-left: 20px;">
+                            <li>✓ Agent Builder nativo</li>
+                            <li>✓ Automatizado y escalable</li>
+                            <li>✓ Einstein Trust Layer</li>
+                            <li>✓ Integración tiempo real</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(0, 161, 224, 0.15); border: 2px solid #00A1E0; border-radius: 8px; padding: 12px;">
+                        <h4 style="color: #00A1E0; margin-bottom: 10px; font-size: 19px;">🔧 Componentes - Platform Base</h4>
+                        <div style="font-size: 14px; line-height: 1.5;">
+                            <p style="margin: 3px 0;"><strong>Platform:</strong> Salesforce Agent Builder (100% nativo)</p>
+                            <p style="margin: 3px 0;"><strong>LLM:</strong> Claude 3.5 Sonnet via Model Factory</p>
+                            <p style="margin: 3px 0; margin-top: 6px;"><strong>Licencias:</strong></p>
+                            <ul style="margin: 3px 0 3px 20px; padding: 0; line-height: 1.5;">
+                                <li>✅ 100K licencias Agentforce disponibles</li>
+                                <li>✅ 125 usuarios (AMs) - dentro de capacidad</li>
+                            </ul>
+                            <p style="margin: 6px 0 0 0;"><strong>Costo:</strong> S/Costo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box green" style="margin: 15px 0; padding: 12px;">
+                    <h3 style="font-size: 19px; margin-bottom: 10px;">🎯 Función del Agente</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 2px 1fr; gap: 12px; margin-top: 5px;">
+                        <ul style="font-size: 14px; line-height: 1.5; margin: 0; padding-left: 20px;">
+                            <li><strong>Lee</strong> Account Plans incompletos (incluso 10% completos)</li>
+                            <li><strong>Identifica</strong> campos vacíos y prioriza</li>
+                            <li><strong>Recomienda</strong> qué incluir basado en contexto</li>
+                        </ul>
+                        <div style="background: rgba(76, 175, 80, 0.5); width: 2px; height: 100%;"></div>
+                        <ul style="font-size: 14px; line-height: 1.5; margin: 0; padding-left: 20px;">
+                            <li><strong>Sugiere</strong> contenido usando Claude 3.5 Sonnet</li>
+                            <li><strong>Guía</strong> al AM paso a paso sin abrumar</li>
+                            <li><strong>Mantiene</strong> el scoring que Miguel validó</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 8px; margin-top: 12px;">
+                    <p style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin: 0;">
+                        <em>Nota:</em> El POC de Miguel tenía limitaciones (Chrome Extension, proceso manual, sin seguridad corporativa) que se resuelven con esta arquitectura enterprise.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Plan de Ejecución -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="logo-header-mini">
+                    <div class="logo-box salesforce-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">S</div>
+                    </div>
+                    <div class="logo-box cirion-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">C</div>
+                    </div>
+                </div>
+
+                <h2 style="font-size: 30px; margin-bottom: 15px;">📅 Plan de Ejecución (4 meses)</h2>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 12px;">
+
+                    <!-- FASE 1 -->
+                    <div style="background: rgba(76, 175, 80, 0.15); border: 2px solid #4CAF50; border-radius: 8px; padding: 14px;">
+                        <h3 style="color: #4CAF50; font-size: 18px; margin-bottom: 8px;">✅ FASE 1: Quick Wins</h3>
+                        <p style="font-size: 13px; margin: 5px 0;"><strong>Objetivo:</strong> Validar con planes de alta calidad</p>
+                        <div style="margin-top: 10px; font-size: 13px; line-height: 1.6;">
+                            <p style="margin: 4px 0;">✓ <strong>22 AMs</strong>, 72 planes</p>
+                            <p style="margin: 4px 0;">✓ Score: 85.9% → 95%+</p>
+                            <p style="margin: 4px 0;">✓ 34 planes 75-99% (casi listos)</p>
+                            <p style="margin: 4px 0; color: #4CAF50; font-weight: 600;">📅 Julio 2026 (4 semanas)</p>
+                        </div>
+                    </div>
+
+                    <!-- PAUSA -->
+                    <div style="background: rgba(255, 193, 7, 0.15); border: 2px solid #FFC107; border-radius: 8px; padding: 14px;">
+                        <h3 style="color: #FFC107; font-size: 18px; margin-bottom: 8px;">⏸️ PAUSA Estratégica</h3>
+                        <p style="font-size: 13px; margin: 5px 0;"><strong>Objetivo:</strong> Freeze OrgSplit</p>
+                        <div style="margin-top: 10px; font-size: 12px; line-height: 1.5;">
+                            <p style="margin: 3px 0;">• Mantener soporte Fase 1</p>
+                            <p style="margin: 3px 0;">• Analizar resultados y métricas</p>
+                            <p style="margin: 3px 0;">• Refinar prompts del agente</p>
+                            <p style="margin: 3px 0;">• Validar integridad post-split</p>
+                            <p style="margin: 4px 0; color: #FFC107; font-weight: 600;">📅 Sept-Oct 2026 (8 semanas)</p>
+                        </div>
+                    </div>
+
+                    <!-- FASE 2 CONSOLIDADA -->
+                    <div style="background: rgba(76, 175, 80, 0.15); border: 2px solid #4CAF50; border-radius: 8px; padding: 14px;">
+                        <h3 style="color: #4CAF50; font-size: 18px; margin-bottom: 8px;">🚀 FASE 2: Rollout Completo</h3>
+                        <p style="font-size: 13px; margin: 5px 0;"><strong>Objetivo:</strong> Escalar a TODOS los AMs</p>
+                        <div style="margin-top: 10px; font-size: 13px; line-height: 1.6;">
+                            <p style="margin: 4px 0;">✓ <strong>103 AMs</strong>, 620 planes</p>
+                            <p style="margin: 4px 0;">✓ Score: 44.7% → 65%+</p>
+                            <p style="margin: 4px 0;">✓ Meta: 350 planes mejorados</p>
+                            <p style="margin: 4px 0;">✓ Training + Champions</p>
+                            <p style="margin: 4px 0; color: #4CAF50; font-weight: 600;">📅 Nov-Dic 2026 (8 semanas)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 161, 224, 0.1); border-left: 4px solid #00A1E0; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                    <h3 style="font-size: 16px; color: #00A1E0; margin-bottom: 8px;">📊 Timeline & Score Consolidado</h3>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; align-items: center; margin-bottom: 8px;">
+                        <div><strong>Julio:</strong> Fase 1 (4 sem) - 🚀 Launch: 22 Jul</div>
+                        <div><strong>Sep-Oct:</strong> Pausa OrgSplit (8 sem)</div>
+                        <div><strong>Nov-Dic:</strong> Fase 2 (8 sem) - ✅ Final: 20 Dic</div>
+                    </div>
+                    <p style="font-size: 12px; margin: 4px 0; color: rgba(255,255,255,0.9);">
+                        <strong>Total consolidado:</strong> 125 AMs | 692 Account Plans | Score Fase 2: 44.7% (promedio ponderado: 53 AMs × 60.3% + 50 AMs × 28.1%)
+                    </p>
+                </div>
+
+                <!-- Training -->
+                <div style="background: rgba(76, 175, 80, 0.1); border-left: 4px solid #4CAF50; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                    <h3 style="font-size: 16px; color: #4CAF50; margin-bottom: 8px;">🎓 Training & Change Management</h3>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                        <div><strong>Fase 1:</strong> Sesión intensiva 1h + Office hours</div>
+                        <div><strong>Fase 2:</strong> Training 2h + Buddy system (champions Fase 1)</div>
+                    </div>
+                </div>
+
+                <!-- Assumptions Críticos -->
+                <div style="background: rgba(255, 82, 82, 0.1); border-left: 4px solid #FF5252; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                    <h3 style="font-size: 16px; color: #FF5252; margin-bottom: 8px;">⚠️ Assumptions Críticos para Fase 2</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 11px; line-height: 1.5;">
+                        <div>
+                            <p style="margin: 3px 0;">✅ <strong>KPI Fase 1 alcanzado:</strong> Score 90%+ validado en piloto</p>
+                            <p style="margin: 3px 0;">✅ <strong>Adopción confirmada:</strong> Uso activo ≥70% en Fase 1</p>
+                            <p style="margin: 3px 0;">✅ <strong>Champions identificados:</strong> 3-5 amplificadores peer activos</p>
+                            <p style="margin: 3px 0;">✅ <strong>Org Split sin impacto:</strong> Freeze Sept-Oct | Plan sin cambios post-Fase 1</p>
+                        </div>
+                        <div>
+                            <p style="margin: 3px 0;">✅ <strong>Capacidad técnica:</strong> Admin + Dev Cirion asignados</p>
+                            <p style="margin: 3px 0;">✅ <strong>Budget aprobado:</strong> Licencias Agentforce validadas</p>
+                            <p style="margin: 3px 0;">✅ <strong>Data quality baseline:</strong> Integridad post-OrgSplit verificada</p>
+                            <p style="margin: 3px 0;">✅ <strong>Sponsorship activo:</strong> Miguel Moreno + Chiara Andolina</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 10px; margin-top: 8px; font-style: italic; color: rgba(255,255,255,0.7);">
+                        <strong>Disclaimer:</strong> Este plan constituye una recomendación estratégica (advisory). La ejecución será responsabilidad del equipo técnico de Cirion. Salesforce provee arquitectura y guía, no implementación directa.
+                    </p>
+                </div>
+
+                <!-- Pre-Requisitos -->
+                <div style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #FFC107; padding: 10px; border-radius: 6px;">
+                    <h3 style="font-size: 15px; color: #FFC107; margin-bottom: 8px;">⚙️ Pre-Requisitos (Pre-Launch)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <h4 style="font-size: 13px; margin-bottom: 4px; color: #FFC107;">Data Cleanup Mínimo (1-2 semanas)</h4>
+                            <p style="font-size: 11px; margin: 2px 0;"><strong>❌ NO</strong> cleanup masivo | <strong>✅ SÍ</strong> técnico menor:</p>
+                            <ul style="font-size: 11px; line-height: 1.4; margin: 3px 0; padding-left: 18px;">
+                                <li>Validar schema + field security</li>
+                                <li>Eliminar test/dummy plans</li>
+                                <li>Setup de 4 Apex Actions</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 13px; margin-bottom: 4px; color: #00A1E0;">Agent Builder Setup (1-2 semanas)</h4>
+                            <ul style="font-size: 11px; line-height: 1.4; margin: 3px 0; padding-left: 18px;">
+                                <li>Topics configuration</li>
+                                <li>Actions development (4 Apex classes)</li>
+                                <li>Instructions & prompts</li>
+                                <li>Testing & refinement</li>
+                            </ul>
+                            <p style="font-size: 11px; margin: 3px 0;"><strong>Recursos:</strong> 1 Admin SF + 1 Developer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Plan de Ejecución - Evolutivo de Datos -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="logo-header-mini">
+                    <div class="logo-box salesforce-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">S</div>
+                    </div>
+                    <div class="logo-box cirion-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">C</div>
+                    </div>
+                </div>
+
+                <h2 style="font-size: 30px; margin-bottom: 15px;">📊 Plan de Ejecución - Evolutivo de Datos (Consolidado)</h2>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px;">
+                    <!-- FASE 1 -->
+                    <div style="background: rgba(76, 175, 80, 0.08); border: 2px solid #4CAF50; border-radius: 8px; padding: 10px;">
+                        <h3 style="font-size: 19px; color: #4CAF50; margin-bottom: 8px; text-align: center;">✅ Fase 1: Quick Wins</h3>
+                        <p style="font-size: 13px; text-align: center; margin-bottom: 8px; font-weight: 700;">(Julio)</p>
+
+                        <!-- Stats Grid -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                            <div style="background: rgba(76, 175, 80, 0.15); border: 1px solid #4CAF50; border-radius: 6px; padding: 6px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: #4CAF50;">22</div>
+                                <div style="font-size: 11px;">AMs</div>
+                            </div>
+                            <div style="background: rgba(76, 175, 80, 0.15); border: 1px solid #4CAF50; border-radius: 6px; padding: 6px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: #4CAF50;">72</div>
+                                <div style="font-size: 11px;">Planes</div>
+                            </div>
+                            <div style="background: rgba(76, 175, 80, 0.15); border: 1px solid #4CAF50; border-radius: 6px; padding: 6px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: #4CAF50;">85.9%</div>
+                                <div style="font-size: 11px;">Score</div>
+                            </div>
+                            <div style="background: rgba(76, 175, 80, 0.15); border: 1px solid #4CAF50; border-radius: 6px; padding: 6px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: #4CAF50;">34</div>
+                                <div style="font-size: 10px;">Casi listos</div>
+                            </div>
+                        </div>
+
+                        <!-- Top 4 AMs Table -->
+                        <table style="width: 100%; font-size: 10px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: rgba(76, 175, 80, 0.2);">
+                                    <th style="padding: 3px; text-align: left; border: 1px solid rgba(76, 175, 80, 0.3);">Top 4 AMs</th>
+                                    <th style="padding: 3px; border: 1px solid rgba(76, 175, 80, 0.3); text-align: center;">#</th>
+                                    <th style="padding: 3px; border: 1px solid rgba(76, 175, 80, 0.3); text-align: center;">Score</th>
+                                    <th style="padding: 3px; border: 1px solid rgba(76, 175, 80, 0.3); text-align: center;">St</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2);">Carmen Cardenas</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">5</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">92.5%</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">🟢</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2);">Jorge Ochoa</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">3</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">100%</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">🟢</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2);">Matias Venini</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">3</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">100%</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">🟢</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2);">Ivan de Almeida</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">2</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">87.5%</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">🟢</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- FASE 2 CONSOLIDADA -->
+                    <div style="background: rgba(76, 175, 80, 0.08); border: 2px solid #4CAF50; border-radius: 8px; padding: 10px;">
+                        <h3 style="font-size: 19px; color: #4CAF50; margin-bottom: 8px; text-align: center;">🚀 Fase 2: Rollout Completo</h3>
+                        <p style="font-size: 13px; text-align: center; margin-bottom: 8px; font-weight: 700;">(Nov-Dic 2026)</p>
+
+                        <!-- Stats Grid -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                            <div style="background: rgba(76, 175, 80, 0.15); border: 1px solid #4CAF50; border-radius: 6px; padding: 6px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: #4CAF50;">103</div>
+                                <div style="font-size: 11px;">AMs</div>
+                            </div>
+                            <div style="background: rgba(76, 175, 80, 0.15); border: 1px solid #4CAF50; border-radius: 6px; padding: 6px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: #4CAF50;">620</div>
+                                <div style="font-size: 11px;">Planes</div>
+                            </div>
+                            <div style="background: rgba(76, 175, 80, 0.15); border: 1px solid #4CAF50; border-radius: 6px; padding: 6px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: #4CAF50;">44.7%</div>
+                                <div style="font-size: 11px;">Score Actual</div>
+                            </div>
+                            <div style="background: rgba(76, 175, 80, 0.15); border: 1px solid #4CAF50; border-radius: 6px; padding: 6px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: 700; color: #4CAF50;">462</div>
+                                <div style="font-size: 10px;">A mejorar</div>
+                            </div>
+                        </div>
+
+                        <!-- Top 4 AMs Table (mayor score dentro del pool consolidado - potenciales champions) -->
+                        <table style="width: 100%; font-size: 10px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: rgba(76, 175, 80, 0.2);">
+                                    <th style="padding: 3px; text-align: left; border: 1px solid rgba(76, 175, 80, 0.3);">Top 4 AMs</th>
+                                    <th style="padding: 3px; border: 1px solid rgba(76, 175, 80, 0.3); text-align: center;">#</th>
+                                    <th style="padding: 3px; border: 1px solid rgba(76, 175, 80, 0.3); text-align: center;">Score</th>
+                                    <th style="padding: 3px; border: 1px solid rgba(76, 175, 80, 0.3); text-align: center;">St</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2);">Romulo De Moraes</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">16</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">62.5%</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">🟡</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2);">Daniel Bocaccio</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">14</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">62.5%</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">🟡</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2);">Samuel Nunes</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">13</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">62.5%</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">🟡</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2);">Marco Pizzico</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">15</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">44.2%</td>
+                                    <td style="padding: 2px; border: 1px solid rgba(76, 175, 80, 0.2); text-align: center;">🟡</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="font-size: 9px; margin-top: 4px; font-style: italic; color: rgba(255,255,255,0.6);">Consolida ex-Fase 2 (53 AMs, 60.3%) + ex-Fase 3 (50 AMs, 28.1%). Score ponderado: 44.7%.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Plan de Ejecución Detallado -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="logo-header-mini">
+                    <div class="logo-box salesforce-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">S</div>
+                    </div>
+                    <div class="logo-box cirion-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">C</div>
+                    </div>
+                </div>
+
+                <h2 style="font-size: 28px; margin-bottom: 12px;">📅 Plan de Ejecución Detallado</h2>
+
+                <!-- FASE 1 Y PAUSA -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <!-- FASE 1 -->
+                    <div style="background: rgba(76, 175, 80, 0.1); border: 3px solid #4CAF50; border-radius: 8px; padding: 10px;">
+                        <h3 style="font-size: 17px; color: #4CAF50; margin-bottom: 6px; text-align: center;">✅ FASE 1: Quick Wins (Julio)</h3>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                            <div style="background: rgba(76, 175, 80, 0.25); padding: 6px; border-radius: 6px; text-align: center;">
+                                <p style="font-size: 22px; margin: 0; font-weight: 700; color: #4CAF50;">22</p>
+                                <p style="font-size: 10px; margin: 0;">AMs</p>
+                            </div>
+                            <div style="background: rgba(76, 175, 80, 0.25); padding: 6px; border-radius: 6px; text-align: center;">
+                                <p style="font-size: 22px; margin: 0; font-weight: 700; color: #4CAF50;">72</p>
+                                <p style="font-size: 10px; margin: 0;">Planes</p>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 2px 1fr; gap: 10px;">
+                            <!-- Plan de acción -->
+                            <div>
+                                <p style="font-size: 12px; margin: 2px 0 4px 0; font-weight: 700;">Plan de acción:</p>
+                                <ul style="font-size: 11px; line-height: 1.4; margin: 0; padding-left: 14px;">
+                                    <li>Lanzar agente SOLO con 22 AMs</li>
+                                    <li>Training 1h: "Cómo usar el Agente"</li>
+                                    <li>Meta: 34 planes (75-99%) → 100%</li>
+                                    <li>Dashboard semanal</li>
+                                </ul>
+                            </div>
+
+                            <!-- Línea divisoria vertical -->
+                            <div style="background: rgba(76, 175, 80, 0.5); width: 2px; height: 100%;"></div>
+
+                            <!-- Timeline -->
+                            <div>
+                                <p style="font-size: 12px; margin: 2px 0 4px 0; font-weight: 700;">Timeline:</p>
+                                <ul style="font-size: 10px; line-height: 1.3; margin: 0; padding-left: 14px;">
+                                    <li><strong>Sem 1:</strong> Launch + Training</li>
+                                    <li><strong>Sem 2:</strong> AMs trabajando</li>
+                                    <li><strong>Sem 3:</strong> Revisión + ajustes</li>
+                                    <li><strong>Sem 4:</strong> Validación + prep F2</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(76, 175, 80, 0.35); border: 2px solid #4CAF50; border-radius: 6px; padding: 8px; margin-top: 8px; text-align: center;">
+                            <p style="font-size: 12px; margin: 0; font-weight: 700; color: #4CAF50;">🎯 KPI Objetivo</p>
+                            <p style="font-size: 18px; margin: 2px 0; font-weight: 700; color: #4CAF50;">≥30 planes con 100%</p>
+                        </div>
+                    </div>
+
+                    <!-- PAUSA ESTRATÉGICA -->
+                    <div style="background: rgba(255, 193, 7, 0.1); border: 3px solid #FFC107; border-radius: 8px; padding: 10px;">
+                        <h3 style="font-size: 17px; color: #FFC107; margin-bottom: 6px; text-align: center;">⏸️ PAUSA Estratégica (Sep-Oct)</h3>
+
+                        <div style="background: rgba(255, 193, 7, 0.3); padding: 8px; border-radius: 6px; text-align: center; margin-bottom: 8px;">
+                            <p style="font-size: 16px; margin: 0; font-weight: 700; color: #FFC107;">Freeze OrgSplit</p>
+                            <p style="font-size: 11px; margin: 2px 0;">Duración: 6-8 semanas (Sept-Oct 2026)</p>
+                        </div>
+
+                        <p style="font-size: 11px; margin: 2px 0 4px 0; font-weight: 700;">Actividades durante pausa:</p>
+                        <ul style="font-size: 10px; line-height: 1.4; margin: 0 0 8px 0; padding-left: 14px;">
+                            <li>✓ Mantener soporte para Fase 1</li>
+                            <li>✓ Analizar resultados de 4 semanas</li>
+                            <li>✓ Validar integridad de datos post-split</li>
+                            <li>✓ Refinar agente con feedback de Fase 1</li>
+                            <li>✓ Preparar Fase 2 Consolidada (docs + training)</li>
+                        </ul>
+
+                        <div style="background: rgba(255, 82, 82, 0.25); border: 2px solid #FF5252; border-radius: 6px; padding: 6px;">
+                            <p style="font-size: 10px; margin: 0; font-weight: 700; color: #FF5252; text-align: center;">⚠️ NO lanzar Fase 2 durante este período</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FASE 2 CONSOLIDADA -->
+                <div style="background: rgba(76, 175, 80, 0.1); border: 3px solid #4CAF50; border-radius: 8px; padding: 10px;">
+                    <h3 style="font-size: 17px; color: #4CAF50; margin-bottom: 6px; text-align: center;">🚀 FASE 2: Rollout Completo (Nov-Dic 2026)</h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                        <div style="background: rgba(76, 175, 80, 0.25); padding: 6px; border-radius: 6px; text-align: center;">
+                            <p style="font-size: 22px; margin: 0; font-weight: 700; color: #4CAF50;">103</p>
+                            <p style="font-size: 10px; margin: 0;">AMs</p>
+                        </div>
+                        <div style="background: rgba(76, 175, 80, 0.25); padding: 6px; border-radius: 6px; text-align: center;">
+                            <p style="font-size: 22px; margin: 0; font-weight: 700; color: #4CAF50;">620</p>
+                            <p style="font-size: 10px; margin: 0;">Planes</p>
+                        </div>
+                        <div style="background: rgba(76, 175, 80, 0.25); padding: 6px; border-radius: 6px; text-align: center;">
+                            <p style="font-size: 22px; margin: 0; font-weight: 700; color: #4CAF50;">44.7%</p>
+                            <p style="font-size: 10px; margin: 0;">Score Actual</p>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 2px 1fr; gap: 10px;">
+                        <!-- Plan de acción -->
+                        <div>
+                            <p style="font-size: 12px; margin: 2px 0 4px 0; font-weight: 700;">Plan de acción (unificado):</p>
+                            <ul style="font-size: 11px; line-height: 1.4; margin: 0; padding-left: 14px;">
+                                <li>Abrir agente a los 103 AMs restantes en un solo despliegue</li>
+                                <li>Webinar 30min: Lecciones de Fase 1</li>
+                                <li>Peer mentoring: Champions de Fase 1 acompañan grupos de menor score</li>
+                                <li>Training intensivo (2h) + Buddy system para AMs con score bajo</li>
+                                <li>Office hours semanales durante todo el período</li>
+                                <li>Meta: 44.7% → 65%+ | 350 planes mejorados</li>
+                            </ul>
+                        </div>
+
+                        <!-- Línea divisoria vertical -->
+                        <div style="background: rgba(76, 175, 80, 0.5); width: 2px; height: 100%;"></div>
+
+                        <!-- Timeline -->
+                        <div>
+                            <p style="font-size: 12px; margin: 2px 0 4px 0; font-weight: 700;">Timeline:</p>
+                            <ul style="font-size: 10px; line-height: 1.3; margin: 0; padding-left: 14px;">
+                                <li><strong>Sem 1-2:</strong> Launch + Training (todos los AMs)</li>
+                                <li><strong>Sem 3-6:</strong> Trabajo + soporte + peer mentoring</li>
+                                <li><strong>Sem 7-8:</strong> Review final + cierre</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(76, 175, 80, 0.35); border: 2px solid #4CAF50; border-radius: 6px; padding: 8px; margin-top: 8px; text-align: center;">
+                        <p style="font-size: 12px; margin: 0; font-weight: 700; color: #4CAF50;">🎯 KPI Objetivo</p>
+                        <p style="font-size: 18px; margin: 2px 0; font-weight: 700; color: #4CAF50;">≥350 planes con score 65%+</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Gestión de Riesgos -->
+        <div class="slide">
+            <div class="slide-content">
+                <div class="logo-header-mini">
+                    <div class="logo-box salesforce-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">S</div>
+                    </div>
+                    <div class="logo-box cirion-box">
+                        <div class="logo-icon" style="width: 30px; height: 30px; font-size: 16px;">C</div>
+                    </div>
+                </div>
+
+                <h2 style="font-size: 32px; margin-bottom: 15px;">⚠️ Gestión de Riesgos</h2>
+
+                <!-- RIESGOS ALTOS (ROJOS) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <!-- Riesgo 1: Baja adopción -->
+                    <div style="background: rgba(255, 82, 82, 0.15); border: 3px solid #FF5252; border-radius: 8px; padding: 12px;">
+                        <h3 style="font-size: 18px; color: #FF5252; margin-bottom: 6px;">🔴 Riesgo 1: Baja adopción del agente</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                            <div style="background: rgba(255, 82, 82, 0.2); padding: 6px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 12px; margin: 0; opacity: 0.8;">Probabilidad</p>
+                                <p style="font-size: 19px; margin: 2px 0; font-weight: 700;">MEDIA</p>
+                            </div>
+                            <div style="background: rgba(255, 82, 82, 0.2); padding: 6px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 12px; margin: 0; opacity: 0.8;">Impacto</p>
+                                <p style="font-size: 19px; margin: 2px 0; font-weight: 700;">ALTO</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; margin: 4px 0; font-weight: 700;">Mitigación:</p>
+                        <ul style="font-size: 12px; line-height: 1.4; margin: 2px 0; padding-left: 16px;">
+                            <li>Executive sponsorship de Chiara Andolina y Miguel Moreno (comunicación top-down)</li>
+                            <li>Peer champions de Fase 1 promocionan el agente</li>
+                            <li>Gamification: Dashboard "Top Improvers of the Month"</li>
+                            <li>Incentivos: Reconocimiento en reuniones de equipo</li>
+                        </ul>
+                    </div>
+
+                    <!-- Riesgo 3: Calidad de sugerencias -->
+                    <div style="background: rgba(255, 82, 82, 0.15); border: 3px solid #FF5252; border-radius: 8px; padding: 12px;">
+                        <h3 style="font-size: 18px; color: #FF5252; margin-bottom: 6px;">🔴 Riesgo 3: Calidad de sugerencias del agente es baja</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                            <div style="background: rgba(255, 82, 82, 0.2); padding: 6px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 12px; margin: 0; opacity: 0.8;">Probabilidad</p>
+                                <p style="font-size: 19px; margin: 2px 0; font-weight: 700;">MEDIA</p>
+                            </div>
+                            <div style="background: rgba(255, 82, 82, 0.2); padding: 6px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 12px; margin: 0; opacity: 0.8;">Impacto</p>
+                                <p style="font-size: 19px; margin: 2px 0; font-weight: 700;">ALTO</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; margin: 4px 0; font-weight: 700;">Mitigación:</p>
+                        <ul style="font-size: 12px; line-height: 1.4; margin: 2px 0; padding-left: 16px;">
+                            <li>Iteración rápida de prompts en Fase 1 (22 AMs piloto)</li>
+                            <li>A/B testing de diferentes instrucciones</li>
+                            <li>Feedback loop: AMs califican cada sugerencia (👍 👎)</li>
+                            <li>Ajustar antes de escalar a Fases 2-3</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- RIESGOS MEDIOS (AMARILLOS) Y BAJO (VERDE) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                    <!-- Riesgo 2: Freeze Globant -->
+                    <div style="background: rgba(255, 193, 7, 0.15); border: 3px solid #FFC107; border-radius: 8px; padding: 12px;">
+                        <h3 style="font-size: 18px; color: #FFC107; margin-bottom: 6px;">🟡 Riesgo 2: Freeze de Globant impacta timeline</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                            <div style="background: rgba(255, 193, 7, 0.2); padding: 5px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 11px; margin: 0; opacity: 0.8;">Probabilidad</p>
+                                <p style="font-size: 15px; margin: 2px 0; font-weight: 700;">ALTA</p>
+                            </div>
+                            <div style="background: rgba(255, 193, 7, 0.2); padding: 5px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 11px; margin: 0; opacity: 0.8;">Impacto</p>
+                                <p style="font-size: 15px; margin: 2px 0; font-weight: 700;">MEDIO</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; margin: 4px 0; font-weight: 700;">Mitigación:</p>
+                        <ul style="font-size: 11px; line-height: 1.4; margin: 2px 0; padding-left: 14px;">
+                            <li>Ya contemplado (pausa estratégica)</li>
+                            <li>Fases 1-2 antes del freeze (Ago)</li>
+                            <li>Fase 3 después del freeze (Nov)</li>
+                            <li>Usar pausa para analizar y refinar</li>
+                        </ul>
+                    </div>
+
+                    <!-- Riesgo 4: AMs Fase 3 -->
+                    <div style="background: rgba(255, 193, 7, 0.15); border: 3px solid #FFC107; border-radius: 8px; padding: 12px;">
+                        <h3 style="font-size: 18px; color: #FFC107; margin-bottom: 6px;">🟡 Riesgo 4: AMs de Fase 3 no mejoran</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                            <div style="background: rgba(255, 193, 7, 0.2); padding: 5px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 10px; margin: 0; opacity: 0.8;">Probabilidad</p>
+                                <p style="font-size: 14px; margin: 2px 0; font-weight: 700;">MEDIA</p>
+                            </div>
+                            <div style="background: rgba(255, 193, 7, 0.2); padding: 5px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 11px; margin: 0; opacity: 0.8;">Impacto</p>
+                                <p style="font-size: 15px; margin: 2px 0; font-weight: 700;">MEDIO</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; margin: 4px 0; font-weight: 700;">Mitigación:</p>
+                        <ul style="font-size: 11px; line-height: 1.4; margin: 2px 0; padding-left: 14px;">
+                            <li>Training intensivo 2h (vs 1h F1)</li>
+                            <li>Buddy system: mentor F1 → 2-3 F3</li>
+                            <li>Office hours semanales (en vivo)</li>
+                            <li>Meta realista: 28% → 50%</li>
+                            <li>Timeline extendido: 8 sem (vs 4)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Riesgo 5: Coordinación OrgSplit -->
+                    <div style="background: rgba(76, 175, 80, 0.15); border: 3px solid #4CAF50; border-radius: 8px; padding: 12px;">
+                        <h3 style="font-size: 18px; color: #4CAF50; margin-bottom: 6px;">🟢 Riesgo 5: Coordinación con OrgSplit</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                            <div style="background: rgba(76, 175, 80, 0.2); padding: 5px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 10px; margin: 0; opacity: 0.8;">Probabilidad</p>
+                                <p style="font-size: 14px; margin: 2px 0; font-weight: 700;">BAJA</p>
+                            </div>
+                            <div style="background: rgba(76, 175, 80, 0.2); padding: 5px; border-radius: 4px; text-align: center;">
+                                <p style="font-size: 10px; margin: 0; opacity: 0.8;">Impacto</p>
+                                <p style="font-size: 14px; margin: 2px 0; font-weight: 700;">ALTO</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; margin: 4px 0; font-weight: 700;">Mitigación:</p>
+                        <ul style="font-size: 11px; line-height: 1.4; margin: 2px 0; padding-left: 14px;">
+                            <li>✅ Inclusión en sesiones OrgSplit</li>
+                            <li>Validar que planes no se pierdan</li>
+                            <li>Asegurar agente funcione post-split</li>
+                            <li>Documentar impacto en schema</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="nav-controls">
+        <button class="nav-btn" onclick="previousSlide()">← Anterior</button>
+        <button class="nav-btn" onclick="goToSlide(0)">🏠 Portada</button>
+        <button class="nav-btn" onclick="nextSlide()">Siguiente →</button>
+    </div>
+
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">7</span>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+            currentSlide = index;
+            document.getElementById('current-slide').textContent = index + 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function goToSlide(index) {
+            if (index >= 0 && index < totalSlides) {
+                showSlide(index);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                previousSlide();
+            } else if (e.key === 'Home') {
+                goToSlide(0);
+            } else if (e.key === 'End') {
+                goToSlide(totalSlides - 1);
+            }
+        });
+    </script>
+</body>
+</html>

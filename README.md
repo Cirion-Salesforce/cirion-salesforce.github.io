@@ -8,7 +8,8 @@ Portal central de presentaciones y servicios de Salesforce para Cirion Technolog
 cirion-salesforce.github.io/
 ├── index.html (landing page)
 ├── advisory-2026/
-│   └── 2026-07-07-account-plan-health-check/
+│   ├── 2026-07-07-account-plan-health-check/
+│   └── 2026-07-13-plan-ejecucion-consolidado/
 └── advisory-2027/
     └── (futuras presentaciones)
 ```
@@ -16,7 +17,8 @@ cirion-salesforce.github.io/
 ## URLs Públicas
 
 - **Landing principal:** https://cirion-salesforce.github.io
-- **Advisory 2026:** https://cirion-salesforce.github.io/advisory-2026/2026-07-07-account-plan-health-check/
+- **Advisory 2026 - Account Plan Health Check:** https://cirion-salesforce.github.io/advisory-2026/2026-07-07-account-plan-health-check/
+- **Advisory 2026 - Plan de Ejecución Consolidado:** https://cirion-salesforce.github.io/advisory-2026/2026-07-13-plan-ejecucion-consolidado/
 
 ## Agregar Nueva Presentación
 
